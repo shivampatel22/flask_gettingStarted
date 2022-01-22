@@ -1,9 +1,12 @@
+#import libraries
 from flask import (Flask, render_template, abort, jsonify, 
                     request, redirect, url_for)
 from model import db, save_db
 
+#global flask object-app
 app = Flask(__name__)
 
+#view function for welcome page
 @app.route("/welcome")
 def date():
     return render_template(
@@ -11,6 +14,8 @@ def date():
         cards=db
     )
 
+#view function for card view
+#accept index of card from url and render the particular card page
 @app.route("/card/<int:index>")
 def card_view(index):
     try:
@@ -35,6 +40,7 @@ def api_card_details(index):
 def api_card_list():
     return jsonify(db)
 
+#view function to add new cards
 @app.route('/add_card', methods=["GET", "POST"])
 def add_card():
     if request.method == "POST":
@@ -47,6 +53,7 @@ def add_card():
     else:
         return render_template("add_card.html")
 
+#view function to remove existing cards
 @app.route('/remove_card/<int:index>', methods=["GET", "POST"])
 def remove_card(index):
     try:
