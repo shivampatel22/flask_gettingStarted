@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome{% endblock %}
+
+{% block content %}
+    <h1>Welcome to my first template page</h1>
+    <p>
+        Flask is a micro web framework written in Python. It is classified as a microframework because it does not require 
+        particular tools or libraries. It has no database abstraction layer, form validation, or any other components where
+        pre-existing third-party libraries provide common functions. However, Flask supports extensions that can add application
+        features as if they were implemented in Flask itself.
+    </p>
+    <img src="/static/valorant.jpg">
+    <h2>Flash Cards</h2>
+    <ul>
+        {% for card in cards %}
+            <li>
+                <a href="{{ url_for('card_view', index=loop.index0) }}">
+                    {{ card.agent }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('add_card') }}">Add Card</a>
+{% endblock %}
