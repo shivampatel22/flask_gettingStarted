@@ -8,13 +8,13 @@
 </head>
 <body>
     <h1>Remove Card</h1>
-    Agent: {{ card.agent }} <br>
-    Type: {{ card.type }}
+    Agent: {{ card.agent_name }} <br>
+    Type: {{ card.agent_type }}
 
     <h2>Are you sure?</h2>
     <form method="post">
         <button type="submit">Yes</button>
-        <a href="{{ url_for('date') }}">No</a>
+        <a href="{{ url_for('welcome') }}">No</a>
     </form>
 </body>
 </html>
