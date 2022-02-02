@@ -15,8 +15,8 @@
     <ul>
         {% for card in cards %}
             <li>
-                <a href="{{ url_for('card_view', index=loop.index0) }}">
-                    {{ card.agent }}
+                <a href="{{ url_for('card_view', index=card._id) }}">
+                    {{ card.agent_name }}
                 </a>
             </li>
         {% endfor %}

@@ -5,26 +5,26 @@
 {% block content %}
     <h1>Flash Card</h1>
     <p>
-        Agent : {{card.agent}} <br>
-        Type : {{card.type}}
+        Agent : {{card.agent_name}} <br>
+        Type : {{card.agent_type}}
     </p>
     <p>
         <button>
-            <a href="{{url_for('date')}}">
+            <a href="{{url_for('welcome')}}">
                 Welcome
             </a>
         </button>
         <button>
-            {% if index < max_index %}
-                <a href="{{url_for('card_view', index=index + 1)}}">
+            {% if next_index <= max_index %}
+                <a href="{{url_for('card_view', index=next_index)}}">
                     Next Card
                 </a>
             {% else %}
-                <a href="{{url_for('card_view', index=0)}}">
+                <a href="{{url_for('card_view', index=min_index)}}">
                     Start Over
                 </a>
             {% endif %}
         </button>
     </p>
-    <a href="{{ url_for('remove_card', index=index) }}">Remove card</a>
+    <a href="{{ url_for('remove_card', index=curr_index) }}">Remove card</a>
 {% endblock %}
