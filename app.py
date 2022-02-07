@@ -1,11 +1,12 @@
 #import libraries
 from enum import unique
 from flask import (Flask, render_template, abort, jsonify, 
-                    request, redirect, url_for)
+                    request, redirect, url_for, flash)
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
-from model import db, save_db
+#from model import db, save_db
 from datetime import datetime
+import pdb
 
 #global flask object->app
 app = Flask(__name__)
@@ -13,6 +14,7 @@ app = Flask(__name__)
 #configurations for SQLAlchemy
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///getting_started.db'             #used for connecting to database
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False                               #do not track modifications
+app.config['SECRET_KEY'] = 'secretkey'                          
 
 #object of SQLAlchemy class 
 sqla = SQLAlchemy(app)
@@ -85,6 +87,8 @@ def add_card():
         
         """get the id of this record"""
         id = fc._id
+        """add a success flash message"""
+        flash("Card {} has been created successfully.".format(fc.agent_name), "success")
 #        return redirect(url_for('card_view', index=len(db)-1))
         return redirect(url_for('card_view', index=id))
 
@@ -98,8 +102,10 @@ def remove_card(index):
         if request.method == "POST":
 #            del db[index]
 #            save_db()
+            fc = FlashCards.query.filter_by(_id=index).first()
             FlashCards.query.filter_by(_id=index).delete()
             sqla.session.commit()
+            flash("Card {} has been removed successfully.".format(fc.agent_name), "success")
             return redirect(url_for('welcome'))
         else:
             return render_template('remove_card.html', card=FlashCards.query.filter_by(_id=index).first())

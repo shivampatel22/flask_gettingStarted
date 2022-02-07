@@ -8,7 +8,16 @@
     <link rel="stylesheet" href="{{url_for('static', filename='style.css') }}">
 </head>
 <body>
+    {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+            {% for type,content in messages %}
+                <div class="alert alert-{{ type }}">
+                    {{ content }}
+                </div>    
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
     {% block content %}
     {% endblock %}   
 </body>
-</html>
+</html>                                                                                                                     
