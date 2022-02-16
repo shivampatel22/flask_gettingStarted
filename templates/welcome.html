@@ -21,5 +21,8 @@
             </li>
         {% endfor %}
     </ul>
-    <a href="{{ url_for('add_card') }}">Add Card</a>
+    <button><a href="{{ url_for('add_card') }}">Add Card</a></button>
+    <button><a href="{{ url_for('add_category') }}">Add Category</a></button>
+    <button><a href="{{ url_for('category_view') }}">Categories</a></button>
+    
 {% endblock %}

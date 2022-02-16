@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Ctaegories{% endblock %}
+
+{% block content %}
+    <h1>Agent Categories</h1>
+    <ul>
+        {% for c in categories %}
+            <li>
+                {{ c.category }}
+            </li>
+        {% endfor %}
+    </ul>
+    <button><a href="{{ url_for('welcome') }}">Welcome</a></button>
+{% endblock %}
