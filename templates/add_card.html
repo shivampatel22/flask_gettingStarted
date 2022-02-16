@@ -4,7 +4,7 @@
 
 {% block content %}
     <h1>Add Card</h1>
-    <form method="post" action="{{ url_for('add_card') }}">
+    <form method="post" action="{{ url_for('add_card') }}" enctype="multipart/form-data">
         <!-- wtf method to print hidden field. Field to hold CSRF token will be hidden and defined automatically-->
         {{ form.hidden_tag() }}
         <p>
@@ -15,6 +15,11 @@
         <p>
             {{ form.type.label }}
             {{ form.type }}
+            <!--input type="text" name="type"-->
+        </p>
+        <p>
+            {{ form.image.label }}<br>
+            {{ form.image }}
             <!--input type="text" name="type"-->
         </p>
         {{ form.submit }}

@@ -1,23 +1,33 @@
 #import libraries
 from wsgiref.validate import validator
 from flask import (Flask, render_template, abort, jsonify, 
-                    request, redirect, url_for, flash)
+                    request, redirect, send_from_directory, url_for, flash)
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func, Column, Integer, String, ForeignKey, insert, create_engine
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SubmitField, SelectField
+from flask_wtf.file import FileAllowed
+from wtforms import StringField, TextAreaField, SubmitField, SelectField, FileField
 from wtforms.validators import InputRequired, DataRequired
+from werkzeug.utils import secure_filename
 #from model import db, save_db
-from datetime import datetime
 import pdb
+import os
+import datetime
+from secrets import token_hex
 
 #global flask object->app
 app = Flask(__name__)
 
+#get the absolute path for this file
+basedir = os.path.abspath(os.path.dirname(__file__))
+
 #configurations for SQLAlchemy
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///getting_started.db'             #used for connecting to database
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False                               #do not track modifications
-app.config['SECRET_KEY'] = 'secretkey'                          
+app.config['SECRET_KEY'] = 'secretkey' 
+app.config['ALLOWED_IMAGE_EXTENSIONS'] = ["jpeg", "png", "jpg"]
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 
+app.config['IMAGE_UPLOADS'] = os.path.join(basedir, "uploads")                      
 
 #object of SQLAlchemy class 
 sqla = SQLAlchemy(app)
@@ -28,10 +38,12 @@ class FlashCards(sqla.Model):
     _id = sqla.Column("id", sqla.Integer, primary_key=True)
     agent_name = sqla.Column(sqla.String(50), unique=True)
     agent_type = sqla.Column(sqla.String(50))
+    agent_image = sqla.Column(sqla.String(100))
 
-    def __init__(self, agent_name, agent_type):
+    def __init__(self, agent_name, agent_type, filename=""):
         self.agent_name = agent_name
         self.agent_type = agent_type
+        self.agent_image = filename
         
 class AgentCategory(sqla.Model):
     #class representing the database table for agent types
@@ -46,6 +58,7 @@ class AddCardForm(FlaskForm):
     #class representing add card form
     name = StringField("Name",  validators=[InputRequired("Input is Required!"), DataRequired("Data is Required!")])
     type = SelectField("Type", coerce=int)
+    image = FileField("Image", validators=[FileAllowed(app.config['ALLOWED_IMAGE_EXTENSIONS'], "Images Only!")])
     submit = SubmitField("Create")
 
 class EditCardForm(AddCardForm):
@@ -55,6 +68,10 @@ class AddAgentCategoryForm(FlaskForm):
     #class representing add agent category form
     category = StringField("Category", validators=[InputRequired("Input is Required!"), DataRequired("Data is Required!")])
     submit = SubmitField("Add")
+
+@app.route("/uploads/<filename>")
+def uploads(filename):
+    return send_from_directory(app.config['IMAGE_UPLOADS'], filename)
 
 #view function for welcome page
 @app.route("/welcome")
@@ -110,6 +127,13 @@ def add_card():
 
     """check if the request is POST and all fields have valid input"""
     if form.validate_on_submit():
+        filename = ''
+        if form.image.data.filename:
+            filename = generateUniqueName(form.image.data.filename)
+            """check if filename is secure"""
+            filename = secure_filename(filename)
+            """save the image in uploads folder"""
+            form.image.data.save(os.path.join(app.config['IMAGE_UPLOADS'], filename))
 #        new_card = {"agent": request.form['agent'],
 #
 #         "type": request.form['type']}
@@ -121,7 +145,7 @@ def add_card():
         """accessing the form data using Flask-wtf"""
         name = form.name.data
         type = form.type.data
-        fc = FlashCards(name, type)
+        fc = FlashCards(name, type, filename)
         sqla.session.add(fc)
         sqla.session.commit()
         
@@ -140,16 +164,19 @@ def add_card():
 @app.route('/remove_card/<int:index>', methods=["GET", "POST"])
 def remove_card(index):
     try:
+        fc = FlashCards.query.filter_by(_id=index).first()
         if request.method == "POST":
 #            del db[index]
 #            save_db()
-            fc = FlashCards.query.filter_by(_id=index).first()
             FlashCards.query.filter_by(_id=index).delete()
             sqla.session.commit()
             flash("Card {} has been removed successfully.".format(fc.agent_name), "success")
             return redirect(url_for('welcome'))
         else:
-            return render_template('remove_card.html', card=FlashCards.query.filter_by(_id=index).first())
+            return render_template('remove_card.html', 
+            card=fc,
+            type = AgentCategory.query.filter_by(_id=fc.agent_type).first()
+            )
     except IndexError:
         abort(404)
 
@@ -190,6 +217,13 @@ def add_category():
 def category_view():
     categories = AgentCategory.query.all()
     return render_template('category.html', categories=categories)
+
+#generate a unique filename for image
+def generateUniqueName(name):
+    format = '%Y%m%dT%H%M%S'
+    now = datetime.datetime.utcnow().strftime(format)
+    random_string = token_hex(2)
+    return(random_string + "_" + now + "_" + name)
 
 if __name__ == '__main__':
     sqla.create_all()               #create the database
