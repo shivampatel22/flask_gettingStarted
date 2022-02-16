@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}addCategory{% endblock %}
+
+{% block content %}
+    <h1>Add Category</h1>
+    <form method="post" action="{{ url_for('add_category') }}">
+        <!-- wtf method to print hidden field. Field to hold CSRF token will be hidden and defined automatically-->
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.category.label }}
+            {{ form.category }}
+        </p>
+        {{ form.submit }}
+        <button>
+            <a href="{{ url_for('welcome') }}">Welcome</a>
+        </button>
+    </form>
+    
+{% endblock %}

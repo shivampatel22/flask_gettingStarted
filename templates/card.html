@@ -5,8 +5,8 @@
 {% block content %}
     <h1>Flash Card</h1>
     <p>
-        Agent : {{card.agent_name}} <br>
-        Type : {{card.agent_type}}
+        Agent : {{ card.agent_name }} <br>
+        Type : {{ type.category }}
     </p>
     <p>
         <button>
@@ -24,6 +24,11 @@
                     Start Over
                 </a>
             {% endif %}
+        </button>
+        <button>
+            <a href="{{url_for('edit_card', index=curr_index)}}">
+                Update
+            </a>
         </button>
     </p>
     <a href="{{ url_for('remove_card', index=curr_index) }}">Remove card</a>

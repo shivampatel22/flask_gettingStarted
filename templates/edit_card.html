@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
-{% block title %}addcard{% endblock %}
+{% block title %}editCard{% endblock %}
 
 {% block content %}
-    <h1>Add Card</h1>
-    <form method="post" action="{{ url_for('add_card') }}">
+    <h1>Edit Card</h1>
+    <form method="post" action="{{ url_for('edit_card', index=card._id) }}">
         <!-- wtf method to print hidden field. Field to hold CSRF token will be hidden and defined automatically-->
         {{ form.hidden_tag() }}
         <p>
