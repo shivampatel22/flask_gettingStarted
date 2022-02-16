@@ -9,6 +9,13 @@
         Type : {{ type.category }}
     </p>
     <p>
+        {% if card.agent_image %}
+            <img src="{{ url_for('uploads', filename=card.agent_image) }}" width="250" height="250">
+        {% else %}
+            <img src="{{ url_for('static', filename='logo.png') }}">
+        {% endif %}
+    </p>
+    <p>
         <button>
             <a href="{{url_for('welcome')}}">
                 Welcome
