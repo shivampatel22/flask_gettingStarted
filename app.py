@@ -4,11 +4,11 @@ from flask import (Flask, render_template, abort, jsonify,
                     request, redirect, send_from_directory, url_for, flash)
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func, Column, Integer, String, ForeignKey, insert, create_engine
-from flask_wtf import FlaskForm
+from flask_wtf import FlaskForm, RecaptchaField  
 from flask_wtf.file import FileAllowed
 from wtforms import StringField, TextAreaField, SubmitField, SelectField, FileField
 from wtforms.validators import InputRequired, DataRequired
-from werkzeug.utils import secure_filename
+from werkzeug.utils import secure_filename, escape
 #from model import db, save_db
 import pdb
 import os
@@ -27,7 +27,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False                            
 app.config['SECRET_KEY'] = 'secretkey' 
 app.config['ALLOWED_IMAGE_EXTENSIONS'] = ["jpeg", "png", "jpg"]
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 
-app.config['IMAGE_UPLOADS'] = os.path.join(basedir, "uploads")                      
+app.config['IMAGE_UPLOADS'] = os.path.join(basedir, "uploads")
+app.config['RECAPTCHA_PUBLIC_KEY'] = "6LfgmJAeAAAAAJBA_mQKn7by0xG1_iJFs5phfbGd"
+app.config['RECAPTCHA_PRIVATE_KEY'] = "6LfgmJAeAAAAAO_nGPfYGKU9hfwniaNau_RVnkrQ"              
 
 #object of SQLAlchemy class 
 sqla = SQLAlchemy(app)
@@ -59,6 +61,7 @@ class AddCardForm(FlaskForm):
     name = StringField("Name",  validators=[InputRequired("Input is Required!"), DataRequired("Data is Required!")])
     type = SelectField("Type", coerce=int)
     image = FileField("Image", validators=[FileAllowed(app.config['ALLOWED_IMAGE_EXTENSIONS'], "Images Only!")])
+    recaptcha = RecaptchaField()
     submit = SubmitField("Create")
 
 class EditCardForm(AddCardForm):
@@ -142,8 +145,8 @@ def add_card():
         """getting the form data and commiting to database"""
 #        name = request.form['agent']
 #        type = request.form['type']
-        """accessing the form data using Flask-wtf"""
-        name = form.name.data
+        """accessing the form data using Flask-wtf. Escape the special symbols before persisting the data."""
+        name = escape(form.name.data)
         type = form.type.data
         fc = FlashCards(name, type, filename)
         sqla.session.add(fc)
@@ -188,7 +191,7 @@ def edit_card(index):
     form.type.choices = c
     card = FlashCards.query.get_or_404(index)
     if form.validate_on_submit():
-        card.agent_name = form.name.data
+        card.agent_name = escape(form.name.data)
         card.agent_type = form.type.data
         sqla.session.commit()
         flash("Card {} updated!".format(card.agent_name))
@@ -204,7 +207,7 @@ def edit_card(index):
 def add_category():
     form = AddAgentCategoryForm()
     if request.method == "POST":
-        category = form.category.data
+        category = escape(form.category.data)
         c = AgentCategory(category)
         sqla.session.add(c)
         sqla.session.commit()
