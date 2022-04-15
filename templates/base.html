@@ -1,23 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% block head%}
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>{% block title %}{% endblock %}</title>
-    <link rel="stylesheet" href="{{url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.css') }}">
+    {% endblock %}
 </head>
 <body>
-    {% with messages = get_flashed_messages(with_categories=True) %}
-        {% if messages %}
-            {% for type,content in messages %}
-                <div class="alert alert-{{ type }}">
-                    {{ content }}
-                </div>    
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-    {% block content %}
-    {% endblock %}   
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-dark fixed-top bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="{{ url_for('welcome') }}">
+                    <img src="{{url_for('static', filename='logo.png')}}" width="30" height="30" class="d-inline-block align-top"> Valorant
+                </a>
+                <div class="collapse navbar-collapse" id="navbarCollapse">
+                    <ul class="nav navbar-nav mr-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('welcome') }}">Home</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false">Agents</a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item" href="{{ url_for('add_card') }}">Add card</a>    
+                            </div>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false">Categories</a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <a class="nav-link" href="{{ url_for('category_view') }}">View Categories</a>
+                                <a class="nav-link" href="{{ url_for('add_category') }}">Add Categories</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav> 
+    </header>
+    
+    <main role="main">
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for type,content in messages %}
+                    <div class="alert alert-{{ type }} mt-5">
+                        {{ content }}
+                    </div>    
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <div class="container mt-5">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </main>
+    
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+    <script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
 </body>
 </html>                                                                                                                     
