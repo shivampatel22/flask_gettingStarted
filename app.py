@@ -9,11 +9,13 @@ from flask_wtf.file import FileAllowed
 from wtforms import StringField, TextAreaField, SubmitField, SelectField, FileField
 from wtforms.validators import InputRequired, DataRequired
 from werkzeug.utils import secure_filename, escape
+from PIL import Image
 #from model import db, save_db
 import pdb
 import os
 import datetime
 from secrets import token_hex
+import math
 
 #global flask object->app
 app = Flask(__name__)
@@ -81,10 +83,17 @@ def uploads(filename):
 def welcome():
     """query all records from database and pass the object to welcome template"""
     flashCards = FlashCards.query.all()
+    numRows = math.ceil(len(flashCards) / 4)
+    agentCategories = AgentCategory.query.all()
+    mapping = {}
+    for c in agentCategories:
+        mapping[str(c._id)] = c.category
     return render_template(
         "welcome.html",
  #       cards=db
-        cards = flashCards
+        cards = flashCards,
+        numRows = numRows,
+        mapping = mapping
     )
 
 #view function for card view
@@ -118,6 +127,8 @@ def card_view(index):
             raise IndexError
     except IndexError:
         abort(404)
+    except AttributeError:
+        abort(404)
 
 #view function to add new cards
 @app.route('/add_card', methods=["GET", "POST"])
@@ -137,6 +148,7 @@ def add_card():
             filename = secure_filename(filename)
             """save the image in uploads folder"""
             form.image.data.save(os.path.join(app.config['IMAGE_UPLOADS'], filename))
+            #image_resize(filename)
 #        new_card = {"agent": request.form['agent'],
 #
 #         "type": request.form['type']}
@@ -191,10 +203,18 @@ def edit_card(index):
     form.type.choices = c
     card = FlashCards.query.get_or_404(index)
     if form.validate_on_submit():
+        filename = ''
+        if form.image.data.filename:
+            filename = generateUniqueName(form.image.data.filename)
+            """check if filename is secure"""
+            filename = secure_filename(filename)
+            """save the image in uploads folder"""
+            form.image.data.save(os.path.join(app.config['IMAGE_UPLOADS'], filename))
         card.agent_name = escape(form.name.data)
         card.agent_type = form.type.data
+        card.agent_image = filename
         sqla.session.commit()
-        flash("Card {} updated!".format(card.agent_name))
+        flash("Card {} updated!".format(card.agent_name), "success")
         return redirect(url_for('welcome'))
     
     form.name.data = card.agent_name
@@ -227,6 +247,12 @@ def generateUniqueName(name):
     now = datetime.datetime.utcnow().strftime(format)
     random_string = token_hex(2)
     return(random_string + "_" + now + "_" + name)
+
+def image_resize(filename):
+    img = Image.open(os.path.join(app.config['IMAGE_UPLOADS'], filename))
+    size = (200, 200)
+    img.thumbnail(size)
+    img.save(os.path.join(app.config['IMAGE_UPLOADS'], filename))
 
 if __name__ == '__main__':
     sqla.create_all()               #create the database
