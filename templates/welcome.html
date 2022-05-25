@@ -1,8 +1,60 @@
 {% extends "base.html" %}
 
-{% block title %}Welcome{% endblock %}
+{% block head %}
+    {{ super() }}
+    {% block title %}Welcome{% endblock %}
+    <style>
+        body{
+            background: url('../static/bckgd_new.jpg') no-repeat fixed;
+            background-size: cover;
+        }
+    </style>
+{% endblock %}
 
 {% block content %}
+            <div id="welcomeCarousel" class="carousel slide" data-ride="carousel">
+                <ol class="carousel-indicators">
+                    <li data-target="#welcomeCarousel" data-slide-to="0" class="active"></li>
+                    <li data-target="#welcomeCarousel" data-slide-to="1"></li>
+                    <li data-target="#welcomeCarousel" data-slide-to="2"></li>
+                </ol>
+                <div class="carousel-inner">
+                    <div class="carousel-item active welcome-carousel-slide1">
+                        <div class="container">
+                            <div class="carousel-caption">
+                                <h1>Welcome to Valorant101</h1>
+                                <p>This is a web application based on the popular online competitive FPS game - Valorant. It's developed using Flask, Bootstrap, SQLAlchemy, WTForms,
+                                    Jinja, etc.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carousel-item welcome-carousel-slide2">
+                        <div class="container">
+                            <div class="carousel-caption">
+                                <h1>AGENTS</h1>
+                                <p>Meet the agents...</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carousel-item welcome-carousel-slide3">
+                        <div class="container">
+                            <div class="carousel-caption">
+                                <h1>RANKING SYSTEM</h1>
+                                <p>Valorant ranked player ratting explained...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <a class="carousel-control-prev" href="#welcomeCarousel" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                </a>
+                <a class="carousel-control-next" href="#welcomeCarousel" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                </a>
+            </div>
     <h1>Welcome to my first template page</h1>
     <p>
         Flask is a micro web framework written in Python. It is classified as a microframework because it does not require 
@@ -11,18 +63,36 @@
         features as if they were implemented in Flask itself.
     </p>
     <img src="/static/valorant.jpg">
-    <h2>Flash Cards</h2>
-    <ul>
-        {% for card in cards %}
-            <li>
-                <a href="{{ url_for('card_view', index=card._id) }}">
-                    {{ card.agent_name }}
-                </a>
-            </li>
+    <div class="p-4 mb-3 mt-2 bg-dark border border-primary text-white text-center">
+        <h3>Agents</h3>
+    </div>
+ 
+    <div class="container">
+        {% for i in range(numRows) %}
+            <div class="row">
+            {% for j in range(4*i, (4*i)+4) %}
+                {% if j < cards|length %}
+                    <div class="col-lg-3 mt-2 d-flex align-items-stretch">
+                        <div class="card text-white bg-dark border-primary">
+                            <div class="card-header"><h5>{{ cards[j].agent_name }}</h5></div>
+                            {% if cards[j].agent_image %}
+                                <img src="{{ url_for('uploads', filename=cards[j].agent_image) }}" class="card-img-top element">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='logo.png') }}" class="card-img-top element">
+                            {% endif %}
+                            <div class="card-body d-flex flex-column">
+                                <h6 class="card-title">{{ mapping[cards[j].agent_type] }}</h6>
+                                <div>
+                                <a href="{{ url_for('card_view', index=cards[j]._id) }}" class="btn btn-primary text-white mt-auto align-self-start">View</a>
+                                <a href="{{ url_for('edit_card', index=cards[j]._id) }}" class="btn btn-primary text-white mt-auto align-self-center">Edit</a>
+                                <a href="{{ url_for('remove_card', index=cards[j]._id) }}" class="btn btn-primary text-white mt-auto align-self-end">Remove</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
         {% endfor %}
-    </ul>
-    <button><a href="{{ url_for('add_card') }}">Add Card</a></button>
-    <button><a href="{{ url_for('add_category') }}">Add Category</a></button>
-    <button><a href="{{ url_for('category_view') }}">Categories</a></button>
-    
+    </div>
 {% endblock %}
